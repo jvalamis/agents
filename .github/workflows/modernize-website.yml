@@ -4,6 +4,10 @@ on:
   issues:
     types: [opened]
   workflow_dispatch:
+    inputs:
+      website_url:
+        description: "URL"
+        required: true
 
 jobs:
   product_owner:
@@ -87,8 +91,7 @@ jobs:
           if [ "${{ github.event_name }}" = "issues" ]; then
             echo "url=${{ github.event.issue.body }}" >> $GITHUB_OUTPUT
           else
-            echo "Error: Please create an issue with the website URL to modernize" >> $GITHUB_STEP_SUMMARY
-            exit 1
+            echo "url=${{ github.event.inputs.website_url }}" >> $GITHUB_OUTPUT
           fi
       - name: Clone Website
         run: |
