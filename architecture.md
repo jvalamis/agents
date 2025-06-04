@@ -1,6 +1,6 @@
 # Architecture
 
-**Note:** The user interface (Next.js, located in `src/ui/`) is the entry point for the pipeline. Users provide the initial prompt and website URL via the UI, which triggers the agent workflow starting with the PO agent.
+**Note:** The pipeline is triggered through GitHub's interface (issues or manual workflow dispatch). Users provide the website URL, which triggers the agent workflow starting with the PO agent.
 
 **Testing Note:** Jest is used as the test runner for backend/agent and pipeline code. Tests are located in the `tests/` directory.
 
@@ -110,4 +110,4 @@ https://www.mermaidchart.com/app/projects/e023b0f6-1b86-4d3a-83b7-0c8fbed48de2/d
     - Additional work requirements
     - Cycle restart decisions
 
-- The pipeline is triggered by user input from the UI (Next.js, `src/ui/`).
+- The pipeline is triggered through GitHub's interface (issues or manual workflow dispatch).

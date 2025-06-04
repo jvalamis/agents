@@ -1,7 +1,0 @@
-{
-    "name": "agents",
-    "version": "1.0.0",
-    "scripts": {
-        "dev": "cd src/ui && npm run dev"
-    }
-}

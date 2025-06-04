@@ -1,22 +1,13 @@
-# Project Roadmap (New Architecture)
+# Project Roadmap
 
-This roadmap outlines the steps to get the new AI agent pipeline up and running, with all agent and LLM logic handled in a GitHub Actions YAML workflow. The UI is only responsible for triggering the pipeline.
-
----
-
-## 0. User Interface
-
-- [ ] Implement a simple web-based landing page as the entry point for the app (Next.js, located in `src/ui/`)
-  - [ ] Centered input box for website URL and prompt (single field)
-  - [ ] Submit button labeled 'Go' that triggers the GitHub Actions pipeline
-  - [ ] To run the UI: `cd src/ui && npm run dev`
+This roadmap outlines the steps to get the AI agent pipeline up and running, with all agent and LLM logic handled in a GitHub Actions YAML workflow.
 
 ---
 
 ## 1. GitHub Actions Pipeline
 
 - [ ] Write a GitHub Actions YAML workflow in `.github/workflows/`
-  - [ ] Accept input from the UI (e.g., via repository_dispatch, issue creation, or workflow_dispatch)
+  - [ ] Accept website URL from GitHub issue or manual trigger
   - [ ] Run all agent logic and LLM calls in the pipeline (using OpenAI, HuggingFace, etc.)
   - [ ] Clone/scrape the input website
   - [ ] Modernize the site and output a static site (Astro or similar)
@@ -25,24 +16,25 @@ This roadmap outlines the steps to get the new AI agent pipeline up and running,
 
 ---
 
-## 2. UI ↔ Pipeline Integration
+## 2. Pipeline Integration
 
-- [ ] Wire up the UI to trigger the GitHub Actions workflow
-  - [ ] Use the GitHub API to send a repository_dispatch event, create an issue, or trigger the workflow directly
-  - [ ] Show feedback to the user that the pipeline has started
+- [ ] Set up GitHub issue templates for website modernization requests
+- [ ] Configure workflow to automatically process new issues
+- [ ] Add status updates and progress tracking in issue comments
 
 ---
 
 ## 3. Documentation & Visibility
 
-- [ ] Update README and docs to reflect the new architecture
-- [ ] Document how to run the UI, trigger the pipeline, and interpret results
+- [ ] Update README and docs to reflect the simplified architecture
+- [ ] Document how to trigger the pipeline and interpret results
+- [ ] Add examples of successful modernizations
 
 ---
 
 ## 4. MVP Launch
 
-- [ ] Run an end-to-end test: input a real website URL and prompt, trigger the pipeline, and deploy the result to GitHub Pages
+- [ ] Run an end-to-end test: create an issue with a real website URL, trigger the pipeline, and deploy the result to GitHub Pages
 - [ ] Review and iterate based on results and feedback
 
 ---
