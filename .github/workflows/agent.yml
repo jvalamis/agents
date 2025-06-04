@@ -16,20 +16,285 @@ jobs:
     outputs:
       vision: ${{ steps.set-vision.outputs.vision }}
       goals: ${{ steps.set-goals.outputs.goals }}
+      scope_approved: ${{ steps.approve-scope.outputs.approved }}
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-      - name: Generate Product Vision
+
+      - name: Get Website URL
+        id: get-url
+        run: |
+          if [ "${{ github.event_name }}" = "issues" ]; then
+            echo "url=${{ github.event.issue.body }}" >> $GITHUB_OUTPUT
+          else
+            echo "url=${{ github.event.inputs.website_url }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Analyze Website
+        id: analyze-website
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAPI }}
+        run: |
+          # Create a temporary Python script
+          cat > analyze.py << 'EOF'
+          import os
+          import json
+          import requests
+
+          def analyze_website(url):
+              headers = {
+                  "Authorization": f"Bearer {os.environ['OPENAI_API_KEY']}",
+                  "Content-Type": "application/json"
+              }
+              
+              prompt = f"""As a Product Owner, analyze this website and identify key areas for modernization:
+              URL: {url}
+              
+              Please provide a detailed analysis including:
+              1. Current User Experience Assessment
+              2. Key Functionality Review
+              3. Areas Needing Modernization
+              4. User Pain Points
+              
+              Format the response as a JSON object with these keys:
+              - current_experience
+              - key_functionality
+              - modernization_areas
+              - pain_points
+              """
+              
+              data = {
+                  "model": "gpt-4-turbo-preview",
+                  "messages": [{"role": "user", "content": prompt}],
+                  "temperature": 0.7
+              }
+              
+              response = requests.post(
+                  "https://api.openai.com/v1/chat/completions",
+                  headers=headers,
+                  json=data
+              )
+              
+              if response.status_code == 200:
+                  result = response.json()
+                  content = result['choices'][0]['message']['content']
+                  try:
+                      analysis = json.loads(content)
+                      print(json.dumps(analysis, indent=2))
+                  except json.JSONDecodeError:
+                      print(content)
+              else:
+                  print(f"Error: {response.status_code}")
+                  print(response.text)
+
+          if __name__ == "__main__":
+              url = os.environ.get('WEBSITE_URL')
+              if url:
+                  analyze_website(url)
+              else:
+                  print("No website URL provided")
+          EOF
+
+          # Install required packages
+          pip install requests
+
+          # Run the analysis
+          WEBSITE_URL="${{ steps.get-url.outputs.url }}" python analyze.py > website_analysis.json
+
+      - name: Define Product Vision
         id: set-vision
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAPI }}
         run: |
-          echo "vision=Modernize website with modern UI/UX" >> $GITHUB_OUTPUT
-      - name: Set Business Goals
-        id: set-goals
+          # Create a temporary Python script
+          cat > vision.py << 'EOF'
+          import os
+          import json
+          import requests
+
+          def generate_vision(url):
+              headers = {
+                  "Authorization": f"Bearer {os.environ['OPENAI_API_KEY']}",
+                  "Content-Type": "application/json"
+              }
+              
+              prompt = f"""As a Product Owner, define a clear vision for modernizing this website:
+              URL: {url}
+              
+              Please provide:
+              1. Product Vision: A clear, compelling vision for the modernized website
+              2. Business Goals: Specific, measurable goals for the modernization
+              3. Success Criteria: How we'll measure the success of the modernization
+              
+              Format the response as a JSON object with these keys:
+              - vision
+              - goals
+              - success_criteria
+              """
+              
+              data = {
+                  "model": "gpt-4-turbo-preview",
+                  "messages": [{"role": "user", "content": prompt}],
+                  "temperature": 0.7
+              }
+              
+              response = requests.post(
+                  "https://api.openai.com/v1/chat/completions",
+                  headers=headers,
+                  json=data
+              )
+              
+              if response.status_code == 200:
+                  result = response.json()
+                  content = result['choices'][0]['message']['content']
+                  try:
+                      vision = json.loads(content)
+                      print(json.dumps(vision, indent=2))
+                  except json.JSONDecodeError:
+                      print(content)
+              else:
+                  print(f"Error: {response.status_code}")
+                  print(response.text)
+
+          if __name__ == "__main__":
+              url = os.environ.get('WEBSITE_URL')
+              if url:
+                  generate_vision(url)
+              else:
+                  print("No website URL provided")
+          EOF
+
+          # Run the vision generation
+          WEBSITE_URL="${{ steps.get-url.outputs.url }}" python vision.py > vision.json
+
+      - name: Review and Approve Scope
+        id: approve-scope
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAPI }}
         run: |
-          echo "goals=Improve performance, accessibility, and user experience" >> $GITHUB_OUTPUT
+          # Create a temporary Python script
+          cat > scope_review.py << 'EOF'
+          import os
+          import json
+          import requests
+
+          def review_scope(url):
+              headers = {
+                  "Authorization": f"Bearer {os.environ['OPENAI_API_KEY']}",
+                  "Content-Type": "application/json"
+              }
+              
+              prompt = f"""As a Product Owner, review the scope for modernizing this website:
+              URL: {url}
+              
+              Please provide:
+              1. Scope Assessment: Is the scope clear and achievable?
+              2. Risk Analysis: What are the potential risks?
+              3. Approval Decision: Should we proceed? (true/false)
+              4. Feedback: Any specific feedback or adjustments needed
+              
+              Format the response as a JSON object with these keys:
+              - assessment
+              - risks
+              - approved
+              - feedback
+              """
+              
+              data = {
+                  "model": "gpt-4-turbo-preview",
+                  "messages": [{"role": "user", "content": prompt}],
+                  "temperature": 0.7
+              }
+              
+              response = requests.post(
+                  "https://api.openai.com/v1/chat/completions",
+                  headers=headers,
+                  json=data
+              )
+              
+              if response.status_code == 200:
+                  result = response.json()
+                  content = result['choices'][0]['message']['content']
+                  try:
+                      review = json.loads(content)
+                      print(json.dumps(review, indent=2))
+                      # Set the approved status as an output
+                      print(f"::set-output name=approved::{str(review['approved']).lower()}")
+                  except json.JSONDecodeError:
+                      print(content)
+              else:
+                  print(f"Error: {response.status_code}")
+                  print(response.text)
+
+          if __name__ == "__main__":
+              url = os.environ.get('WEBSITE_URL')
+              if url:
+                  review_scope(url)
+              else:
+                  print("No website URL provided")
+          EOF
+
+          # Run the scope review
+          WEBSITE_URL="${{ steps.get-url.outputs.url }}" python scope_review.py > scope_review.json
+
+      - name: Create Product Vision Issue
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const analysis = JSON.parse(fs.readFileSync('website_analysis.json', 'utf8'));
+            const vision = JSON.parse(fs.readFileSync('vision.json', 'utf8'));
+            const scopeReview = JSON.parse(fs.readFileSync('scope_review.json', 'utf8'));
+
+            const body = `## Website Analysis
+
+            ### Current User Experience
+            ${analysis.current_experience}
+
+            ### Key Functionality
+            ${analysis.key_functionality}
+
+            ### Areas Needing Modernization
+            ${analysis.modernization_areas}
+
+            ### User Pain Points
+            ${analysis.pain_points}
+
+            ## Product Vision
+            ${vision.vision}
+
+            ## Business Goals
+            ${vision.goals}
+
+            ## Success Criteria
+            ${vision.success_criteria}
+
+            ## Scope Review
+            ${scopeReview.assessment}
+
+            ## Risk Analysis
+            ${scopeReview.risks}
+
+            ## Feedback
+            ${scopeReview.feedback}
+
+            Original URL: ${{ steps.get-url.outputs.url }}`;
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Product Vision: ${new URL(steps.get-url.outputs.url).hostname}`,
+              body: body
+            });
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: po-analysis
+          path: |
+            website_analysis.json
+            vision.json
+            scope_review.json
+          retention-days: 30
 
   project_manager:
     name: Project Manager Agent
@@ -40,18 +305,93 @@ jobs:
       requirements: ${{ steps.set-requirements.outputs.requirements }}
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-      - name: Generate Tasks
+
+      - name: Get Website URL
+        id: get-url
+        run: |
+          if [ "${{ github.event_name }}" = "issues" ]; then
+            echo "url=${{ github.event.issue.body }}" >> $GITHUB_OUTPUT
+          else
+            echo "url=${{ github.event.inputs.website_url }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Generate Project Plan
         id: set-tasks
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAPI }}
         run: |
-          echo "tasks=Update UI components, optimize performance, improve accessibility" >> $GITHUB_OUTPUT
-      - name: Set Requirements
-        id: set-requirements
-        run: |
-          echo "requirements=Modern design system, responsive layout, SEO optimization" >> $GITHUB_OUTPUT
+          # Create a temporary Python script
+          cat > project_plan.py << 'EOF'
+          import os
+          import json
+          import requests
+
+          def generate_plan(url):
+              headers = {
+                  "Authorization": f"Bearer {os.environ['OPENAI_API_KEY']}",
+                  "Content-Type": "application/json"
+              }
+              
+              prompt = f"""As a Project Manager, create a detailed project plan for modernizing this website:
+              URL: {url}
+              
+              Please provide:
+              1. Task Breakdown: Detailed list of tasks and subtasks
+              2. Timeline: Estimated duration for each task
+              3. Dependencies: Task dependencies and critical path
+              4. Resource Requirements: What's needed for each task
+              
+              Format the response as a JSON object with these keys:
+              - tasks
+              - timeline
+              - dependencies
+              - resources
+              """
+              
+              data = {
+                  "model": "gpt-4-turbo-preview",
+                  "messages": [{"role": "user", "content": prompt}],
+                  "temperature": 0.7
+              }
+              
+              response = requests.post(
+                  "https://api.openai.com/v1/chat/completions",
+                  headers=headers,
+                  json=data
+              )
+              
+              if response.status_code == 200:
+                  result = response.json()
+                  content = result['choices'][0]['message']['content']
+                  try:
+                      plan = json.loads(content)
+                      print(json.dumps(plan, indent=2))
+                  except json.JSONDecodeError:
+                      print(content)
+              else:
+                  print(f"Error: {response.status_code}")
+                  print(response.text)
+
+          if __name__ == "__main__":
+              url = os.environ.get('WEBSITE_URL')
+              if url:
+                  generate_plan(url)
+              else:
+                  print("No website URL provided")
+          EOF
+
+          # Install required packages
+          pip install requests
+
+          # Run the plan generation
+          WEBSITE_URL="${{ steps.get-url.outputs.url }}" python project_plan.py > project_plan.json
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pm-analysis
+          path: project_plan.json
+          retention-days: 30
 
   qa_agent:
     name: QA Agent
@@ -62,29 +402,7 @@ jobs:
       quality_metrics: ${{ steps.set-metrics.outputs.quality_metrics }}
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-      - name: Generate Test Cases
-        id: set-test-cases
-        run: |
-          echo "test_cases=UI tests, performance tests, accessibility tests" >> $GITHUB_OUTPUT
-      - name: Set Quality Metrics
-        id: set-metrics
-        run: |
-          echo "quality_metrics=Lighthouse score > 90, WCAG 2.1 compliance" >> $GITHUB_OUTPUT
 
-  development:
-    name: Development Agent
-    needs: [project_manager, qa_agent]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
       - name: Get Website URL
         id: get-url
         run: |
@@ -93,15 +411,177 @@ jobs:
           else
             echo "url=${{ github.event.inputs.website_url }}" >> $GITHUB_OUTPUT
           fi
-      - name: Clone Website
+
+      - name: Generate Test Plan
+        id: set-test-cases
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAPI }}
         run: |
-          echo "Cloning website from ${{ steps.get-url.outputs.url }}"
-      - name: Modernize Website
+          # Create a temporary Python script
+          cat > test_plan.py << 'EOF'
+          import os
+          import json
+          import requests
+
+          def generate_test_plan(url):
+              headers = {
+                  "Authorization": f"Bearer {os.environ['OPENAI_API_KEY']}",
+                  "Content-Type": "application/json"
+              }
+              
+              prompt = f"""As a QA Engineer, create a comprehensive test plan for modernizing this website:
+              URL: {url}
+              
+              Please provide:
+              1. Test Cases: Detailed test scenarios and cases
+              2. Quality Metrics: Specific metrics to measure success
+              3. Test Environment: Required setup and tools
+              4. Acceptance Criteria: Clear pass/fail criteria
+              
+              Format the response as a JSON object with these keys:
+              - test_cases
+              - quality_metrics
+              - test_environment
+              - acceptance_criteria
+              """
+              
+              data = {
+                  "model": "gpt-4-turbo-preview",
+                  "messages": [{"role": "user", "content": prompt}],
+                  "temperature": 0.7
+              }
+              
+              response = requests.post(
+                  "https://api.openai.com/v1/chat/completions",
+                  headers=headers,
+                  json=data
+              )
+              
+              if response.status_code == 200:
+                  result = response.json()
+                  content = result['choices'][0]['message']['content']
+                  try:
+                      plan = json.loads(content)
+                      print(json.dumps(plan, indent=2))
+                  except json.JSONDecodeError:
+                      print(content)
+              else:
+                  print(f"Error: {response.status_code}")
+                  print(response.text)
+
+          if __name__ == "__main__":
+              url = os.environ.get('WEBSITE_URL')
+              if url:
+                  generate_test_plan(url)
+              else:
+                  print("No website URL provided")
+          EOF
+
+          # Install required packages
+          pip install requests
+
+          # Run the test plan generation
+          WEBSITE_URL="${{ steps.get-url.outputs.url }}" python test_plan.py > test_plan.json
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: qa-analysis
+          path: test_plan.json
+          retention-days: 30
+
+  development:
+    name: Development Agent
+    needs: [project_manager, qa_agent]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get Website URL
+        id: get-url
         run: |
-          echo "Implementing modernization plan"
-      - name: Run Tests
+          if [ "${{ github.event_name }}" = "issues" ]; then
+            echo "url=${{ github.event.issue.body }}" >> $GITHUB_OUTPUT
+          else
+            echo "url=${{ github.event.inputs.website_url }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Generate Implementation Plan
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAPI }}
         run: |
-          echo "Running test suite"
+          # Create a temporary Python script
+          cat > implementation.py << 'EOF'
+          import os
+          import json
+          import requests
+
+          def generate_implementation(url):
+              headers = {
+                  "Authorization": f"Bearer {os.environ['OPENAI_API_KEY']}",
+                  "Content-Type": "application/json"
+              }
+              
+              prompt = f"""As a Senior Developer, create an implementation plan for modernizing this website:
+              URL: {url}
+              
+              Please provide:
+              1. Technical Stack: Recommended technologies and tools
+              2. Implementation Steps: Detailed steps to modernize
+              3. Code Structure: Proposed architecture and organization
+              4. Migration Strategy: How to handle the transition
+              
+              Format the response as a JSON object with these keys:
+              - tech_stack
+              - implementation_steps
+              - code_structure
+              - migration_strategy
+              """
+              
+              data = {
+                  "model": "gpt-4-turbo-preview",
+                  "messages": [{"role": "user", "content": prompt}],
+                  "temperature": 0.7
+              }
+              
+              response = requests.post(
+                  "https://api.openai.com/v1/chat/completions",
+                  headers=headers,
+                  json=data
+              )
+              
+              if response.status_code == 200:
+                  result = response.json()
+                  content = result['choices'][0]['message']['content']
+                  try:
+                      plan = json.loads(content)
+                      print(json.dumps(plan, indent=2))
+                  except json.JSONDecodeError:
+                      print(content)
+              else:
+                  print(f"Error: {response.status_code}")
+                  print(response.text)
+
+          if __name__ == "__main__":
+              url = os.environ.get('WEBSITE_URL')
+              if url:
+                  generate_implementation(url)
+              else:
+                  print("No website URL provided")
+          EOF
+
+          # Install required packages
+          pip install requests
+
+          # Run the implementation plan generation
+          WEBSITE_URL="${{ steps.get-url.outputs.url }}" python implementation.py > implementation.json
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dev-analysis
+          path: implementation.json
+          retention-days: 30
 
   final_review:
     name: Final Review
@@ -109,13 +589,119 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Review Changes
+
+      - name: Get Website URL
+        id: get-url
         run: |
-          echo "Reviewing final implementation"
-      - name: Generate Report
+          if [ "${{ github.event_name }}" = "issues" ]; then
+            echo "url=${{ github.event.issue.body }}" >> $GITHUB_OUTPUT
+          else
+            echo "url=${{ github.event.inputs.website_url }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Generate Final Review
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAPI }}
         run: |
-          echo "Generating modernization report"
-      - name: Deploy to GitHub Pages
-        if: success()
-        run: |
-          echo "Deploying to GitHub Pages"
+          # Create a temporary Python script
+          cat > final_review.py << 'EOF'
+          import os
+          import json
+          import requests
+
+          def generate_review(url):
+              headers = {
+                  "Authorization": f"Bearer {os.environ['OPENAI_API_KEY']}",
+                  "Content-Type": "application/json"
+              }
+              
+              prompt = f"""As a Senior Architect, provide a final review of the modernization plan for this website:
+              URL: {url}
+              
+              Please provide:
+              1. Overall Assessment: Is the plan complete and feasible?
+              2. Risk Analysis: What are the remaining risks?
+              3. Recommendations: Any final suggestions?
+              4. Next Steps: What should be done first?
+              
+              Format the response as a JSON object with these keys:
+              - assessment
+              - risks
+              - recommendations
+              - next_steps
+              """
+              
+              data = {
+                  "model": "gpt-4-turbo-preview",
+                  "messages": [{"role": "user", "content": prompt}],
+                  "temperature": 0.7
+              }
+              
+              response = requests.post(
+                  "https://api.openai.com/v1/chat/completions",
+                  headers=headers,
+                  json=data
+              )
+              
+              if response.status_code == 200:
+                  result = response.json()
+                  content = result['choices'][0]['message']['content']
+                  try:
+                      review = json.loads(content)
+                      print(json.dumps(review, indent=2))
+                  except json.JSONDecodeError:
+                      print(content)
+              else:
+                  print(f"Error: {response.status_code}")
+                  print(response.text)
+
+          if __name__ == "__main__":
+              url = os.environ.get('WEBSITE_URL')
+              if url:
+                  generate_review(url)
+              else:
+                  print("No website URL provided")
+          EOF
+
+          # Install required packages
+          pip install requests
+
+          # Run the final review generation
+          WEBSITE_URL="${{ steps.get-url.outputs.url }}" python final_review.py > final_review.json
+
+      - name: Create Final Review Issue
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const review = JSON.parse(fs.readFileSync('final_review.json', 'utf8'));
+
+            const body = `## Final Review
+
+            ### Overall Assessment
+            ${review.assessment}
+
+            ### Risk Analysis
+            ${review.risks}
+
+            ### Recommendations
+            ${review.recommendations}
+
+            ### Next Steps
+            ${review.next_steps}
+
+            Original URL: ${{ steps.get-url.outputs.url }}`;
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Final Review: ${new URL(steps.get-url.outputs.url).hostname}`,
+              body: body
+            });
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: final-review
+          path: final_review.json
+          retention-days: 30

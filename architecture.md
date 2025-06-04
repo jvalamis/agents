@@ -49,7 +49,6 @@ https://www.mermaidchart.com/app/projects/e023b0f6-1b86-4d3a-83b7-0c8fbed48de2/d
    - Initial product vision and goals
    - High-level requirements
    - Business objectives
-   - **The PO agent uses either Ollama or HuggingFace as the LLM backend to generate a structured modernization plan**
 
 2. **Project Manager to Product Owner**
 

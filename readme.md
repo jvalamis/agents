@@ -1,73 +1,156 @@
-# AI Agent Pipeline Project (New Architecture)
+# AI Agent Pipeline Project
 
 ## Project Overview
 
-This project now uses a GitHub Actions YAML pipeline to orchestrate all agent and LLM logic for website modernization. The UI (Next.js, located in `src/ui/`) is responsible only for triggering the pipeline with user input.
+This project uses a GitHub Actions YAML pipeline to orchestrate all agent and LLM logic for website modernization. The pipeline can be triggered directly through GitHub's interface.
 
 **Primary Use Case:**
 
-- The user enters a website URL and a prompt (e.g., "modernize this website") in the UI.
-- The UI triggers the GitHub Actions pipeline (e.g., via repository_dispatch, issue creation, or similar mechanism).
-- The pipeline, defined in a GitHub Actions YAML file, handles all agent logic, LLM calls, and automation steps.
-- The pipeline clones/scrapes the input website, modernizes it, and outputs a fully built static site, auto-deployed to GitHub Pages in a new repository.
+- User provides a website URL by creating a GitHub issue or manually triggering the workflow
+- The GitHub Actions pipeline handles all agent logic, LLM calls, and automation steps
+- The pipeline clones/scrapes the input website, modernizes it, and outputs a fully built static site, auto-deployed to GitHub Pages in a new repository
 
-## User Interface
-
-- The UI is a simple web form built with Next.js (`src/ui/`).
-- Users enter a website URL and a prompt into a single input box.
-- Submitting the form triggers the GitHub Actions pipeline.
-- The UI does **not** run any LLMs or agent logic locally.
-
-## Pipeline Workflow (Modernize Website)
+## Pipeline Workflow
 
 1. **Input**
-   - User provides a website URL and a prompt in the UI.
-2. **Trigger**
-   - The UI sends the input to GitHub (e.g., via repository_dispatch or issue creation) to start the pipeline.
-3. **GitHub Actions Pipeline**
-   - The YAML workflow handles all agent logic, LLM calls (via OpenAI, HuggingFace, etc.), and automation.
-   - The pipeline produces a modernization plan, breaks it into tasks, generates tests, implements features, and deploys the result.
-4. **Deployment**
-   - The modernized static site is auto-deployed to GitHub Pages.
+   - User creates a GitHub issue with the website URL or manually triggers the workflow
+2. **GitHub Actions Pipeline**
+   - The YAML workflow handles all agent logic, LLM calls (via OpenAI, HuggingFace, etc.), and automation
+   - The pipeline produces a modernization plan, breaks it into tasks, generates tests, implements features, and deploys the result
+3. **Deployment**
+   - The modernized static site is auto-deployed to GitHub Pages
+
+## Agent Responsibilities
+
+### Product Owner Agent
+
+The Product Owner agent is the first to analyze the website and establish the modernization vision. It:
+
+1. **Analyzes the Website**
+
+   - Reviews the provided website URL
+   - Identifies key areas for modernization
+   - Understands the current user experience and functionality
+
+2. **Defines Product Vision**
+
+   - Creates a clear, compelling vision for the modernized website
+   - Sets specific, measurable business goals
+   - Establishes success criteria for the modernization
+
+3. **Scope Review**
+
+   - Assesses if the modernization scope is clear and achievable
+   - Identifies potential risks and challenges
+   - Makes a go/no-go decision on proceeding with the modernization
+   - Provides specific feedback and adjustments needed
+
+4. **Outputs**
+   - Creates a GitHub issue with the complete analysis
+   - Generates JSON artifacts containing:
+     - Product vision and goals
+     - Success criteria
+     - Scope assessment
+     - Risk analysis
+     - Feedback and recommendations
+
+### Project Manager Agent
+
+The Project Manager agent takes the Product Owner's vision and creates a detailed execution plan. It:
+
+1. **Creates Project Plan**
+
+   - Breaks down the modernization into detailed tasks and subtasks
+   - Estimates duration for each task
+   - Identifies task dependencies and critical path
+   - Determines resource requirements
+
+2. **Outputs**
+   - Generates JSON artifacts containing:
+     - Detailed task breakdown
+     - Project timeline
+     - Dependency map
+     - Resource requirements
+
+### QA Agent
+
+The QA Agent ensures quality and sets testing standards for the modernization. It:
+
+1. **Creates Test Plan**
+
+   - Defines comprehensive test scenarios and cases
+   - Establishes quality metrics and benchmarks
+   - Specifies test environment requirements
+   - Sets clear acceptance criteria
+
+2. **Outputs**
+   - Generates JSON artifacts containing:
+     - Test cases and scenarios
+     - Quality metrics
+     - Test environment specifications
+     - Acceptance criteria
+
+### Development Agent
+
+The Development Agent creates the technical implementation plan. It:
+
+1. **Technical Planning**
+
+   - Recommends technical stack and tools
+   - Defines implementation steps
+   - Proposes code structure and architecture
+   - Creates migration strategy
+
+2. **Outputs**
+   - Generates JSON artifacts containing:
+     - Technical stack recommendations
+     - Implementation steps
+     - Code structure
+     - Migration strategy
+
+### Final Review
+
+The pipeline concludes with a comprehensive review that:
+
+1. **Assesses Overall Plan**
+
+   - Evaluates completeness and feasibility
+   - Identifies remaining risks
+   - Provides final recommendations
+   - Outlines next steps
+
+2. **Outputs**
+   - Creates a GitHub issue with the final review
+   - Generates JSON artifacts containing:
+     - Overall assessment
+     - Risk analysis
+     - Recommendations
+     - Next steps
 
 ## Technical Stack
 
-- **Next.js**: UI for user input and pipeline trigger
 - **GitHub Actions**: All agent logic, LLM calls, and automation are handled in YAML workflows
-- **LLM Providers**: (e.g., OpenAI, HuggingFace) called from the pipeline, not from the app
+- **LLM Providers**: (e.g., OpenAI, HuggingFace) called from the pipeline
 - **Astro**: Static site generator for modernized output
 - **GitHub Pages**: Deployment target for modernized static sites
 
-## Development Rules
-
-- All agent and LLM logic is handled in the GitHub Actions YAML pipeline.
-- The UI is only responsible for collecting user input and triggering the pipeline.
-- No backend/agent code or LLM integration is present in the app.
-
-## Directory Structure & Code Organization
+## Directory Structure
 
 ```
 llama/
-├── src/
-│   └── ui/             # Next.js app (run with 'cd src/ui && npm run dev')
 ├── .github/
 │   └── workflows/      # GitHub Actions YAML pipeline(s)
-├── README.md           # Project overview and rules
+├── README.md           # Project overview
 └── ...
 ```
 
-## Version Control & Deployment
-
-- All code, documentation, and pipeline logic are maintained in the repository.
-- Each product (modernized website) is output as a new GitHub repository with a standardized naming convention.
-- [GitHub Pages](https://pages.github.com/) is used to deploy the modernized static sites.
-- CI/CD (GitHub Actions) is set up for auto-deployment.
-
 ## Setup Notes
 
-- To run the UI locally: `cd src/ui && npm run dev`
-- To trigger the pipeline, use the UI or manually trigger the workflow in GitHub.
+- To trigger the pipeline:
+  1. Create a new GitHub issue with the website URL in the description
+  2. Or manually trigger the workflow from the Actions tab
+- The pipeline will automatically process the website and create a new repository with the modernized version
 
 ## Roadmap
 
-See `roadmap.md` for the new workflow and development plan.
+See `roadmap.md` for the development plan.
