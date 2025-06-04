@@ -10,7 +10,7 @@ This project uses a GitHub Actions YAML pipeline to orchestrate all agent and LL
 - The GitHub Actions pipeline handles all agent logic, LLM calls, and automation steps
 - The pipeline clones/scrapes the input website, modernizes it, and outputs a fully built static site, auto-deployed to GitHub Pages in a new repository
 
-## Pipeline Workflow (Modernize Website)
+## Pipeline Workflow
 
 1. **Input**
    - User creates a GitHub issue with the website URL or manually triggers the workflow
@@ -27,28 +27,15 @@ This project uses a GitHub Actions YAML pipeline to orchestrate all agent and LL
 - **Astro**: Static site generator for modernized output
 - **GitHub Pages**: Deployment target for modernized static sites
 
-## Development Rules
-
-- All agent and LLM logic is handled in the GitHub Actions YAML pipeline
-- No UI or frontend code is needed
-- The pipeline is triggered through GitHub's interface
-
-## Directory Structure & Code Organization
+## Directory Structure
 
 ```
 llama/
 ├── .github/
 │   └── workflows/      # GitHub Actions YAML pipeline(s)
-├── README.md           # Project overview and rules
+├── README.md           # Project overview
 └── ...
 ```
-
-## Version Control & Deployment
-
-- All code, documentation, and pipeline logic are maintained in the repository
-- Each product (modernized website) is output as a new GitHub repository with a standardized naming convention
-- [GitHub Pages](https://pages.github.com/) is used to deploy the modernized static sites
-- CI/CD (GitHub Actions) is set up for auto-deployment
 
 ## Setup Notes
 

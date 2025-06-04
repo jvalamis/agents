@@ -6,29 +6,29 @@ This roadmap outlines the steps to get the AI agent pipeline up and running, wit
 
 ## 1. GitHub Actions Pipeline
 
-- [ ] Write a GitHub Actions YAML workflow in `.github/workflows/`
-  - [ ] Accept website URL from GitHub issue or manual trigger
-  - [ ] Run all agent logic and LLM calls in the pipeline (using OpenAI, HuggingFace, etc.)
-  - [ ] Clone/scrape the input website
-  - [ ] Modernize the site and output a static site (Astro or similar)
-  - [ ] Run tests and generate reports
-  - [ ] Deploy the result to GitHub Pages
+- [x] Write a GitHub Actions YAML workflow in `.github/workflows/`
+  - [x] Accept website URL from GitHub issue or manual trigger
+  - [x] Run all agent logic and LLM calls in the pipeline (using OpenAI, HuggingFace, etc.)
+  - [x] Clone/scrape the input website
+  - [x] Modernize the site and output a static site (Astro or similar)
+  - [x] Run tests and generate reports
+  - [x] Deploy the result to GitHub Pages
 
 ---
 
 ## 2. Pipeline Integration
 
-- [ ] Set up GitHub issue templates for website modernization requests
-- [ ] Configure workflow to automatically process new issues
-- [ ] Add status updates and progress tracking in issue comments
+- [x] Set up GitHub issue templates for website modernization requests
+- [x] Configure workflow to automatically process new issues
+- [x] Add status updates and progress tracking in issue comments
 
 ---
 
 ## 3. Documentation & Visibility
 
-- [ ] Update README and docs to reflect the simplified architecture
-- [ ] Document how to trigger the pipeline and interpret results
-- [ ] Add examples of successful modernizations
+- [x] Update README and docs to reflect the simplified architecture
+- [x] Document how to trigger the pipeline and interpret results
+- [x] Add examples of successful modernizations
 
 ---
 

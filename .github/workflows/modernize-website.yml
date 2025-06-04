@@ -1,16 +1,9 @@
 name: Modernize Website Pipeline
 
 on:
-  repository_dispatch:
-    types: [modernize-website]
+  issues:
+    types: [opened]
   workflow_dispatch:
-    inputs:
-      website_url:
-        description: "URL of the website to modernize"
-        required: true
-      prompt:
-        description: "Modernization prompt"
-        required: true
 
 jobs:
   product_owner:
@@ -88,9 +81,18 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
+      - name: Get Website URL
+        id: get-url
+        run: |
+          if [ "${{ github.event_name }}" = "issues" ]; then
+            echo "url=${{ github.event.issue.body }}" >> $GITHUB_OUTPUT
+          else
+            echo "Error: Please create an issue with the website URL to modernize" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
       - name: Clone Website
         run: |
-          echo "Cloning website from ${{ github.event.inputs.website_url }}"
+          echo "Cloning website from ${{ steps.get-url.outputs.url }}"
       - name: Modernize Website
         run: |
           echo "Implementing modernization plan"
