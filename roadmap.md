@@ -1,78 +1,48 @@
-# Project Roadmap
+# Project Roadmap (New Architecture)
 
-This roadmap outlines the steps to get the AI agent pipeline up and running, in line with the project README and architecture.
-
----
-
-## 1. Project Setup
-
-- [x] Scaffold directory structure and starter files for all agents, pipeline, models, utils, and data
-- [ ] Initialize `package.json` and install core dependencies (TypeScript, Playwright, Astro, etc.)
-- [ ] Set up `tsconfig.json` for TypeScript support
-- [ ] Add `.gitignore` and configure environment variables in `.env` if needed
+This roadmap outlines the steps to get the new AI agent pipeline up and running, with all agent and LLM logic handled in a GitHub Actions YAML workflow. The UI is only responsible for triggering the pipeline.
 
 ---
 
-## 2. Agent Implementation
+## 0. User Interface
 
-### a. Product Owner (PO) Agent
-
-- [ ] Implement logic to analyze a website URL and prompt, and output a modernization scope, MVP, features, and CI/CD decision
-- [ ] Integrate prompt template usage
-
-### b. Project Manager (PM) Agent
-
-- [ ] Implement logic to break down the PO's scope into actionable tasks for QA and Dev
-- [ ] Integrate prompt template usage
-
-### c. QA Agent
-
-- [ ] Implement logic to generate Playwright test cases for each task
-- [ ] Ensure Playwright HTML reports are generated and can be uploaded as artifacts
-
-### d. Dev Agent
-
-- [ ] Implement logic to modernize the site using the chosen static site generator (default: Astro)
-- [ ] Ensure all QA tests are passed before proceeding
+- [ ] Implement a simple web-based landing page as the entry point for the app (Next.js, located in `src/ui/`)
+  - [ ] Centered input box for website URL and prompt (single field)
+  - [ ] Submit button labeled 'Go' that triggers the GitHub Actions pipeline
+  - [ ] To run the UI: `cd src/ui && npm run dev`
 
 ---
 
-## 3. Pipeline Orchestration
+## 1. GitHub Actions Pipeline
 
-- [ ] Implement the orchestrator to coordinate agent handoff and manage the full workflow
-- [ ] Handle input (website URL + prompt), agent outputs, and error handling
-- [ ] Integrate model management (Ollama/HuggingFace) as needed
-
----
-
-## 4. GitHub Integration & Automation
-
-- [ ] Implement logic to create a new GitHub repository for each product (modernized site) with a standardized naming convention
-- [ ] Set up GitHub Actions for CI/CD:
-  - [ ] Build the static site
-  - [ ] Run Playwright tests and upload HTML reports as artifacts
-  - [ ] Deploy to GitHub Pages automatically if approved by PO
+- [ ] Write a GitHub Actions YAML workflow in `.github/workflows/`
+  - [ ] Accept input from the UI (e.g., via repository_dispatch, issue creation, or workflow_dispatch)
+  - [ ] Run all agent logic and LLM calls in the pipeline (using OpenAI, HuggingFace, etc.)
+  - [ ] Clone/scrape the input website
+  - [ ] Modernize the site and output a static site (Astro or similar)
+  - [ ] Run tests and generate reports
+  - [ ] Deploy the result to GitHub Pages
 
 ---
 
-## 5. Testing & Validation
+## 2. UI ↔ Pipeline Integration
 
-- [ ] Write and run tests for each agent and the pipeline orchestrator
-- [ ] Validate that the pipeline produces a modernized static site, passes QA, and deploys to GitHub Pages
-
----
-
-## 6. Documentation & Visibility
-
-- [ ] Ensure all agent and pipeline READMEs are up to date
-- [ ] Document how to run the pipeline, add new agents, and interpret QA reports
-- [ ] Optionally, publish pipeline and QA reports to the `docs/` directory or GitHub Pages for visibility
+- [ ] Wire up the UI to trigger the GitHub Actions workflow
+  - [ ] Use the GitHub API to send a repository_dispatch event, create an issue, or trigger the workflow directly
+  - [ ] Show feedback to the user that the pipeline has started
 
 ---
 
-## 7. MVP Launch
+## 3. Documentation & Visibility
 
-- [ ] Run an end-to-end test: input a real website URL, modernize it, and deploy the result to GitHub Pages
+- [ ] Update README and docs to reflect the new architecture
+- [ ] Document how to run the UI, trigger the pipeline, and interpret results
+
+---
+
+## 4. MVP Launch
+
+- [ ] Run an end-to-end test: input a real website URL and prompt, trigger the pipeline, and deploy the result to GitHub Pages
 - [ ] Review and iterate based on results and feedback
 
 ---

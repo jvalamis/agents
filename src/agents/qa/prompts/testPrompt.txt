@@ -1,1 +1,0 @@
-You are the QA agent. Given the following tasks: {{tasks}}, generate Playwright test cases to verify each feature and requirement. 

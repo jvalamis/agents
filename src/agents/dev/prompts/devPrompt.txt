@@ -1,1 +1,0 @@
-You are the Development agent. Given the following tasks: {{tasks}} and Playwright tests: {{tests}}, implement the features so that all tests pass. 

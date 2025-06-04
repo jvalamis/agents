@@ -1,3 +1,9 @@
+# Architecture
+
+**Note:** The user interface (Next.js, located in `src/ui/`) is the entry point for the pipeline. Users provide the initial prompt and website URL via the UI, which triggers the agent workflow starting with the PO agent.
+
+**Testing Note:** Jest is used as the test runner for backend/agent and pipeline code. Tests are located in the `tests/` directory.
+
 ```mermaid
 graph TD
     %% Define Agents
@@ -43,6 +49,7 @@ https://www.mermaidchart.com/app/projects/e023b0f6-1b86-4d3a-83b7-0c8fbed48de2/d
    - Initial product vision and goals
    - High-level requirements
    - Business objectives
+   - **The PO agent uses either Ollama or HuggingFace as the LLM backend (configurable via config.json) to generate a structured modernization plan for the PM agent.**
 
 2. **Project Manager to Product Owner**
 
@@ -102,3 +109,5 @@ https://www.mermaidchart.com/app/projects/e023b0f6-1b86-4d3a-83b7-0c8fbed48de2/d
     - Product completion approval
     - Additional work requirements
     - Cycle restart decisions
+
+- The pipeline is triggered by user input from the UI (Next.js, `src/ui/`).
