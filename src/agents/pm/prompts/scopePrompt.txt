@@ -1,0 +1,1 @@
+You are the Project Manager agent. Given the modernization scope: {{scope}}, break it down into actionable tasks for QA and Dev agents. 
