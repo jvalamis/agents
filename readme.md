@@ -10,6 +10,12 @@ This project implements an AI agent pipeline using Ollama and HuggingFace, orche
 - The Product Owner (PO) agent scopes the modernization task.
 - The pipeline clones/scrapes the input website, modernizes it, and outputs a fully built static site, auto-deployed to GitHub Pages in a new repository.
 
+## User Interface
+
+- The application provides a modern web-based landing page as the entry point.
+- Users enter a website URL and a prompt (e.g., "modernize this website") into a central input box.
+- Submitting the form triggers the agent pipeline, starting with the PO agent and proceeding through the full workflow.
+
 ## Pipeline Workflow (Modernize Website)
 
 1. **Input**
